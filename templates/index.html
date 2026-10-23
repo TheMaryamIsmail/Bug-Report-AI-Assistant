@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Bug Report Analyzer | LangGraph & Gemini</title>
+    <!-- Google Fonts & Tailwind CSS CDN for styling utility classes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Marked.js for rendering markdown output nicely -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header Section -->
+    <header class="border-b border-slate-800 bg-slate-900/50 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-spider text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white">AI Bug Analyzer</h1>
+                    <p class="text-xs text-slate-400">Powered by LangGraph & Gemini</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-400 rounded-full animate-pulse"></span> System Online
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="max-w-6xl mx-auto px-6 py-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 flex-grow">
+        
+        <!-- Left Column: Input Form -->
+        <div class="lg:col-span-5 flex flex-col space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col h-full justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-base font-semibold text-white flex items-center">
+                            <i class="fa-solid fa-pen-nib text-indigo-400 mr-2"></i> Bug Description
+                        </h2>
+                        <button type="button" id="loadPresetBtn" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">
+                            Load Sample Bug
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                        Enter raw bug descriptions, support tickets, or user complaints in natural language. Our multi-agent LangGraph workflow will parse, categorize, and structure it.
+                    </p>
+                    
+                    <form id="bugForm" class="space-y-4">
+                        <div>
+                            <textarea 
+                                id="bugDescriptionInput" 
+                                rows="8" 
+                                required
+                                placeholder="e.g., When clicking Checkout on iOS Safari, screen freezes and throws 500 error after 30s..."
+                                class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all resize-none shadow-inner"
+                            ></textarea>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            id="submitBtn"
+                            class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 px-4 rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.99]"
+                        >
+                            <i class="fa-solid fa-microchip-ai"></i>
+                            <span id="btnText">Analyze Bug Pipeline</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Pipeline Nodes Visualizer status tracker -->
+                <div class="mt-8 pt-6 border-t border-slate-800/80">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Workflow Pipeline Status</h3>
+                    <div class="space-y-2.5 text-xs">
+                        <div id="node1" class="flex items-center justify-between text-slate-500 p-2 rounded-lg bg-slate-950/40 border border-slate-900">
+                            <span class="flex items-center"><i class="fa-solid fa-circle-notch mr-2 text-[10px]"></i> 1. Bug Analysis Node</span>
+                            <span class="status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400">Idle</span>
+                        </div>
+                        <div id="node2" class="flex items-center justify-between text-slate-500 p-2 rounded-lg bg-slate-950/40 border border-slate-900">
+                            <span class="flex items-center"><i class="fa-solid fa-circle-notch mr-2 text-[10px]"></i> 2. Severity Detection Node</span>
+                            <span class="status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400">Idle</span>
+                        </div>
+                        <div id="node3" class="flex items-center justify-between text-slate-500 p-2 rounded-lg bg-slate-950/40 border border-slate-900">
+                            <span class="flex items-center"><i class="fa-solid fa-circle-notch mr-2 text-[10px]"></i> 3. Root Cause Suggestion Node</span>
+                            <span class="status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400">Idle</span>
+                        </div>
+                        <div id="node4" class="flex items-center justify-between text-slate-500 p-2 rounded-lg bg-slate-950/40 border border-slate-900">
+                            <span class="flex items-center"><i class="fa-solid fa-circle-notch mr-2 text-[10px]"></i> 4. Format Report Node</span>
+                            <span class="status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400">Idle</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Results Output Display -->
+        <div class="lg:col-span-7 flex flex-col space-y-6">
+            <div id="emptyState" class="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center h-full shadow-xl">
+                <div class="w-16 h-16 bg-slate-800/60 rounded-2xl flex items-center justify-center text-slate-500 mb-4 text-2xl border border-slate-700/50">
+                    <i class="fa-solid fa-file-waveform"></i>
+                </div>
+                <h3 class="text-base font-medium text-slate-300">No Report Generated Yet</h3>
+                <p class="text-xs text-slate-500 max-w-sm mt-1">Submit a bug description on the left panel to trigger the LangGraph execution pipeline.</p>
+            </div>
+
+            <div id="resultContainer" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col h-full">
+                <!-- Meta Tags bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                    <div class="flex items-center space-x-2">
+                        <span id="badgeSeverity" class="px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase">Severity</span>
+                        <span id="badgeFeature" class="bg-slate-800 text-slate-300 px-3 py-1 rounded-full text-xs font-medium border border-slate-700">Feature</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="copyReport()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-xl border border-slate-700 transition-colors cursor-pointer flex items-center space-x-1.5">
+                            <i class="fa-regular fa-copy"></i> <span>Copy Markdown</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Markdown Formatted Report Body -->
+                <div id="markdownOutput" class="mt-6 text-sm text-slate-300 leading-relaxed overflow-y-auto max-h-[600px] pr-2 space-y-4">
+                    <!-- Dynamic Rendered Content -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-900 text-center py-6 text-xs text-slate-600">
+        AI Bug Report Analyzer • Built with FastAPI, LangGraph & Google Gemini
+    </footer>
+
+    <!-- Client-side JavaScript -->
+    <script>
+        const sampleBugText = "When users click the Checkout button on mobile devices (iOS Safari), the screen freezes and throws a 500 server error after 30 seconds. It doesn't happen on desktop Chrome or Android devices. Money gets deducted from credit card but no order confirmation email is sent or created in database.";
+
+        document.getElementById('loadPresetBtn').addEventListener('click', () => {
+            document.getElementById('bugDescriptionInput').value = sampleBugText;
+        });
+
+        const form = document.getElementById('bugForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const description = document.getElementById('bugDescriptionInput').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+
+            // UI Loading State
+            submitBtn.disabled = true;
+            btnText.innerText = "Running LangGraph Pipeline...";
+            resetPipelineNodes();
+            simulatePipelineProgress();
+
+            try {
+                const response = await fetch('/analyze-bug/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bug_description: description })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Server analysis failed.');
+                }
+
+                const data = await response.json();
+                renderResults(data);
+                completePipelineNodes();
+            } catch (err) {
+                alert("Error: " + err.message);
+                resetPipelineNodes();
+            } finally {
+                submitBtn.disabled = false;
+                btnText.innerText = "Analyze Bug Pipeline";
+            }
+        });
+
+        let progressInterval;
+        function simulatePipelineProgress() {
+            const nodes = ['node1', 'node2', 'node3', 'node4'];
+            let current = 0;
+            
+            nodes.forEach(id => {
+                const el = document.getElementById(id);
+                el.className = "flex items-center justify-between text-slate-500 p-2 rounded-lg bg-slate-950/40 border border-slate-900";
+                el.querySelector('.status-badge').innerText = "Idle";
+                el.querySelector('.status-badge').className = "status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400";
+            });
+
+            progressInterval = setInterval(() => {
+                if (current < nodes.length) {
+                    const el = document.getElementById(nodes[current]);
+                    el.className = "flex items-center justify-between text-indigo-300 p-2 rounded-lg bg-indigo-950/20 border border-indigo-500/30 animate-pulse";
+                    el.querySelector('.status-badge').innerText = "Processing...";
+                    el.querySelector('.status-badge').className = "status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+                    
+                    if (current > 0) {
+                        const prev = document.getElementById(nodes[current - 1]);
+                        prev.className = "flex items-center justify-between text-emerald-400 p-2 rounded-lg bg-emerald-950/20 border border-emerald-500/30";
+                        prev.querySelector('.status-badge').innerText = "Completed";
+                        prev.querySelector('.status-badge').className = "status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                    }
+                    current++;
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 800);
+        }
+
+        function completePipelineNodes() {
+            clearInterval(progressInterval);
+            ['node1', 'node2', 'node3', 'node4'].forEach(id => {
+                const el = document.getElementById(id);
+                el.className = "flex items-center justify-between text-emerald-400 p-2 rounded-lg bg-emerald-950/20 border border-emerald-500/30";
+                el.querySelector('.status-badge').innerText = "Completed";
+                el.querySelector('.status-badge').className = "status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+            });
+        }
+
+        function resetPipelineNodes() {
+            clearInterval(progressInterval);
+            ['node1', 'node2', 'node3', 'node4'].forEach(id => {
+                const el = document.getElementById(id);
+                el.className = "flex items-center justify-between text-slate-500 p-2 rounded-lg bg-slate-950/40 border border-slate-900";
+                el.querySelector('.status-badge').innerText = "Idle";
+                el.querySelector('.status-badge').className = "status-badge font-mono text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-400";
+            });
+        }
+
+        let rawMarkdownContent = "";
+        function renderResults(data) {
+            document.getElementById('emptyState').classList.add('hidden');
+            document.getElementById('resultContainer').classList.remove('hidden');
+
+            rawMarkdownContent = data.formatted_report;
+
+            // Severity Badge coloring
+            const badgeSeverity = document.getElementById('badgeSeverity');
+            const sev = data.severity.toLowerCase();
+            if (sev.includes('critical')) {
+                badgeSeverity.className = "px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-rose-500/10 text-rose-400 border border-rose-500/20";
+            } else if (sev.includes('high')) {
+                badgeSeverity.className = "px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20";
+            } else {
+                badgeSeverity.className = "px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20";
+            }
+            badgeSeverity.innerText = `Severity: ${data.severity}`;
+            document.getElementById('badgeFeature').innerText = `Feature: ${data.affected_feature}`;
+
+            // Render Markdown using marked.js
+            document.getElementById('markdownOutput').innerHTML = marked.parse(data.formatted_report);
+        }
+
+        function copyReport() {
+            navigator.clipboard.writeText(rawMarkdownContent);
+            alert("Report copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
