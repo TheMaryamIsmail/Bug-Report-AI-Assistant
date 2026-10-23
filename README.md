@@ -14,22 +14,14 @@ An intelligent, AI-powered system designed to streamline bug tracking, triage, a
 
 🏗️ Architecture Overview
 
-               +----------------------------------+
-               |        User / Client UI         |
-               +----------------------------------+
-                                |
-                                v
-               +----------------------------------+
-               |          FastAPI Backend         |
-               +----------------------------------+
-                                |
-           +--------------------+--------------------+
-           |                                         |
-           v                                         v
-+-----------------------+                 +-----------------------+
-|  LLM & Prompt Chains  |                 | Context & Data Store  |
-|  (LangChain / APIs)   |                 | (Structured JSON/DB)  |
-+-----------------------+                 +-----------------------+
+                       User / Client UI
+                            |
+                      FastAPI Backend     
+            --------------|        |-------------- 
+            |                                    |
+    LLM & Prompt Chains               Context & Data Store  
+  (LangChain / APIs)                    (Structured JSON/DB) 
+
 
 # 🛠️ Tech Stack
 Frontend: HTML5, CSS3 / Modern Glassmorphism UI, JavaScript
@@ -75,7 +67,7 @@ An active API key (e.g., OpenAI, Groq, or Gemini API depending on your configure
   uvicorn main:app --reload
 6. Access the Web Interface
   Open your browser and navigate to:
-  http://localhost:8000
+ 
 
 # 📖 Usage Guide
 Submit Bug Details: Paste the raw error log, terminal output, or a user-reported bug description into the input interface.
