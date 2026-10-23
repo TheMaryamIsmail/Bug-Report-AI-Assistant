@@ -13,8 +13,11 @@ An intelligent, AI-powered system designed to streamline bug tracking, triage, a
 🔗 Developer Framework Ready: Easy integration into existing API pipelines, CI/CD workflows, or project management systems.
 
 🏗️ Architecture Overview
+
                +----------------------------------+
+               
                |        User / Client UI         |
+               
                +----------------------------------+
                                 |
                                 v
