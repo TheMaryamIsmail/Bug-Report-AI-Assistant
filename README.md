@@ -15,31 +15,21 @@ An intelligent, AI-powered system designed to streamline bug tracking, triage, a
 🏗️ Architecture Overview
 
                +----------------------------------+
-               
                |        User / Client UI         |
-               
                +----------------------------------+
                                 |
                                 v
                +----------------------------------+
-               
                |          FastAPI Backend         |
-               
                +----------------------------------+
                                 |
            +--------------------+--------------------+
-           
            |                                         |
-           
            v                                         v
 +-----------------------+                 +-----------------------+
-
 |  LLM & Prompt Chains  |                 | Context & Data Store  |
-
 |  (LangChain / APIs)   |                 | (Structured JSON/DB)  |
-
 +-----------------------+                 +-----------------------+
-
 
 # 🛠️ Tech Stack
 Frontend: HTML5, CSS3 / Modern Glassmorphism UI, JavaScript
